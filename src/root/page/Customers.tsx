@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Table,
   TableBody,
@@ -26,7 +26,14 @@ import {
 } from 'lucide-react';
 import { customersData } from '@data/dummy';
 
-const customersGrid = [
+type Customer = (typeof customersData)[number];
+
+type SortConfig = {
+  key: keyof Customer | null;
+  direction: 'asc' | 'desc';
+};
+
+const customersGrid: { field: keyof Customer; headerText: string }[] = [
   { field: 'CustomerID', headerText: 'ID' },
   { field: 'CustomerName', headerText: 'Name' },
   { field: 'CustomerEmail', headerText: 'Email' },
@@ -38,12 +45,15 @@ const customersGrid = [
 ];
 
 const Customers = () => {
-  const [data, setData] = useState(customersData);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [selectedRows, setSelectedRows] = useState(new Set());
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [data, setData] = useState<Customer[]>(customersData);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: null,
+    direction: 'asc',
+  });
 
   const filteredData = useMemo(() => {
     return data.filter((item) =>
@@ -56,8 +66,8 @@ const Customers = () => {
   const sortedData = useMemo(() => {
     if (!sortConfig.key) return filteredData;
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal = a[sortConfig.key!];
+      const bVal = b[sortConfig.key!];
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
@@ -65,29 +75,34 @@ const Customers = () => {
   }, [filteredData, sortConfig]);
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
+
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return sortedData.slice(start, start + itemsPerPage);
   }, [sortedData, currentPage, itemsPerPage]);
 
-  const handleSort = (key) => {
+  const handleSort = (key: keyof Customer) => {
     setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
     }));
   };
 
-  const handleSelectAll = (checked) => {
-    if (checked) {
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if (checked === true) {
       setSelectedRows(new Set(paginatedData.map((i) => i.CustomerID)));
     } else {
       setSelectedRows(new Set());
     }
   };
 
-  const handleSelectRow = (id, checked) => {
+  const handleSelectRow = (id: number, checked: boolean | 'indeterminate') => {
     const updated = new Set(selectedRows);
-    checked ? updated.add(id) : updated.delete(id);
+    if (checked === true) {
+      updated.add(id);
+    } else {
+      updated.delete(id);
+    }
     setSelectedRows(updated);
   };
 
@@ -99,8 +114,8 @@ const Customers = () => {
     setCurrentPage(1);
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
+  const getStatusColor = (status: Customer['Status']) => {
+    const colors: Record<string, string> = {
       Active:
         'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
       Pending:
@@ -109,6 +124,7 @@ const Customers = () => {
         'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
       Cancel: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };
+
     return (
       colors[status] ||
       'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
@@ -116,9 +132,9 @@ const Customers = () => {
   };
 
   return (
-    <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white dark:bg-secondary-dark-bg rounded-3xl transition-colors duration-300">
+    <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white dark:bg-secondary-dark-bg rounded-3xl transition-colors">
       <div className="mb-8 flex justify-between items-center flex-wrap gap-4">
-        <h3 className="text-3xl font-extrabold tracking-tight dark:text-white text-slate-900">
+        <h3 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
           Customers
         </h3>
 
@@ -132,7 +148,7 @@ const Customers = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-9 dark:bg-main-dark-bg border-gray-200 dark:border-gray-700"
+              className="pl-9 dark:bg-main-dark-bg dark:border-gray-700"
             />
           </div>
           <Button
@@ -140,7 +156,6 @@ const Customers = () => {
             size="icon"
             onClick={handleDelete}
             disabled={selectedRows.size === 0}
-            className="shrink-0"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -164,7 +179,7 @@ const Customers = () => {
                 <TableHead
                   key={col.field}
                   onClick={() => handleSort(col.field)}
-                  className="cursor-pointer hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="cursor-pointer hover:text-slate-900 dark:hover:text-white"
                 >
                   <div className="flex items-center gap-2">
                     {col.headerText}
@@ -184,8 +199,8 @@ const Customers = () => {
                   <TableCell>
                     <Checkbox
                       checked={selectedRows.has(customer.CustomerID)}
-                      onCheckedChange={(c) =>
-                        handleSelectRow(customer.CustomerID, c)
+                      onCheckedChange={(checked) =>
+                        handleSelectRow(customer.CustomerID, checked)
                       }
                     />
                   </TableCell>
@@ -208,7 +223,9 @@ const Customers = () => {
                   <TableCell>{customer.ProjectName}</TableCell>
                   <TableCell>
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(customer.Status)}`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
+                        customer.Status,
+                      )}`}
                     >
                       {customer.Status}
                     </span>
@@ -224,7 +241,7 @@ const Customers = () => {
                   colSpan={9}
                   className="h-24 text-center text-gray-500"
                 >
-                  No records found.
+                  No records found
                 </TableCell>
               </TableRow>
             )}
@@ -232,7 +249,6 @@ const Customers = () => {
         </Table>
       </div>
 
-      {/* Pagination Footer */}
       <div className="flex items-center justify-between mt-6 flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600 dark:text-gray-400">

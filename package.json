@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -24,6 +26,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "gh-pages": "^6.3.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.13.0",
@@ -37,6 +40,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "homepage": "http://Badr-0101.github.io/Dashboard",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",

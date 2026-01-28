@@ -1,4 +1,3 @@
-import React from 'react';
 import { AiOutlineMenu } from 'react-icons/ai';
 import { FiShoppingCart } from 'react-icons/fi';
 import { BsChatLeft, BsMoon, BsSun } from 'react-icons/bs';

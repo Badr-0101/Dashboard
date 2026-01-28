@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useAppSelector } from '@store/typehook';
-import { Button } from './components/shared/ui/button';
 import {
   Ecommerce,
   Orders,
@@ -12,7 +11,7 @@ import {
 } from './root/page/index';
 import { Area, Line, Bar, Pie } from './root/page/Charts/index';
 import Sidebar from './components/shared/ui/Sidebar';
-import { Navbar } from '@components/shared/ui';
+import Navbar from '@components/shared/ui/Navbar';
 import { useEffect } from 'react';
 
 function App() {

@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import {
   Card,
@@ -20,7 +19,7 @@ import {
 
 import { areaChartData } from '@data/dummy';
 
-const chartConfig = {
+const chartConfig: ChartConfig = {
   visitors: {
     label: 'Visitors',
   },

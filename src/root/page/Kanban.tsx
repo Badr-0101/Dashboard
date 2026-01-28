@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@components/shared/ui/button';
 import {
   Card,
@@ -10,12 +10,22 @@ import {
 import { Plus, GripVertical, User } from 'lucide-react';
 import { kanbanData, kanbanGrid } from '@data/dummy';
 
-const Kanban = () => {
-  const [tasks, setTasks] = useState(kanbanData);
-  const [draggedTask, setDraggedTask] = useState(null);
+interface Task {
+  Id: string;
+  Title: string;
+  Summary: string;
+  Priority: string;
+  Status: string;
+  Tags?: string;
+  Assignee: string;
+}
 
-  const getPriorityColor = (priority) => {
-    const colors = {
+const Kanban = () => {
+  const [tasks, setTasks] = useState<Task[]>(kanbanData);
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+
+  const getPriorityColor = (priority: string) => {
+    const colors: Record<string, string> = {
       Low: 'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
       Normal:
         'bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
@@ -29,17 +39,20 @@ const Kanban = () => {
     );
   };
 
-  const handleDragStart = (e, task) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, task: Task) => {
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (e, newStatus) => {
+  const handleDrop = (
+    e: React.DragEvent<HTMLDivElement>,
+    newStatus: string,
+  ) => {
     e.preventDefault();
     if (draggedTask) {
       setTasks((prev) =>
@@ -51,7 +64,7 @@ const Kanban = () => {
     }
   };
 
-  const getTasksByStatus = (status) => {
+  const getTasksByStatus = (status: string) => {
     return tasks.filter((task) => task.Status === status);
   };
 

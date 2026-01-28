@@ -6,7 +6,7 @@ const Bar = () => {
       <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-8  mt-1">
         Bar Chart
       </h1>
-      <ChartBarStacked data={stackedChartData}> </ChartBarStacked>
+      <ChartBarStacked data={stackedChartData} />
     </div>
   );
 };

@@ -1,5 +1,4 @@
-import React from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from '@components/shared/ui/button';
 import {
@@ -13,9 +12,13 @@ import {
   Undo,
   Redo,
 } from 'lucide-react';
-
 import { EditorData } from '@data/dummy';
-const MenuBar = ({ editor }) => {
+
+interface MenuBarProps {
+  editor: Editor | null;
+}
+
+const MenuBar = ({ editor }: MenuBarProps) => {
   if (!editor) return null;
 
   const buttons = [
@@ -37,7 +40,7 @@ const MenuBar = ({ editor }) => {
       action: () => editor.chain().focus().toggleStrike().run(),
       active: 'strike',
     },
-    { type: 'divider' },
+    { type: 'divider' as const },
     {
       icon: <List className="h-4 w-4" />,
       title: 'Bullet List',
@@ -50,7 +53,7 @@ const MenuBar = ({ editor }) => {
       action: () => editor.chain().focus().toggleOrderedList().run(),
       active: 'orderedList',
     },
-    { type: 'divider' },
+    { type: 'divider' as const },
     {
       icon: <Quote className="h-4 w-4" />,
       title: 'Blockquote',
@@ -63,7 +66,7 @@ const MenuBar = ({ editor }) => {
       action: () => editor.chain().focus().toggleCodeBlock().run(),
       active: 'codeBlock',
     },
-    { type: 'divider' },
+    { type: 'divider' as const },
     {
       icon: <Undo className="h-4 w-4" />,
       title: 'Undo',
@@ -79,7 +82,7 @@ const MenuBar = ({ editor }) => {
   return (
     <div className="flex flex-wrap gap-1 p-2 border-b bg-gray-50 dark:bg-main-dark-bg dark:border-gray-700 sticky top-0 z-10">
       {buttons.map((btn, i) =>
-        btn.type === 'divider' ? (
+        'type' in btn && btn.type === 'divider' ? (
           <div
             key={i}
             className="w-px bg-gray-300 dark:bg-gray-700 mx-1 self-stretch"
@@ -87,11 +90,17 @@ const MenuBar = ({ editor }) => {
         ) : (
           <Button
             key={btn.title}
-            variant={editor.isActive(btn.active) ? 'secondary' : 'ghost'}
+            variant={
+              editor.isActive(btn.active as string) ? 'secondary' : 'ghost'
+            }
             size="sm"
             onClick={btn.action}
             title={btn.title}
-            className={`transition-all ${editor.isActive(btn.active) ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400' : 'dark:text-gray-200'}`}
+            className={`transition-all ${
+              editor.isActive(btn.active as string)
+                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+                : 'dark:text-gray-200'
+            }`}
           >
             {btn.icon}
           </Button>
@@ -101,10 +110,10 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-const Editor = () => {
+const EditorComponent = () => {
   const editor = useEditor({
     extensions: [StarterKit],
-    content: `${EditorData}`,
+    content: EditorData,
     editorProps: {
       attributes: {
         class:
@@ -120,7 +129,7 @@ const Editor = () => {
           Editor
         </h3>
         <Button
-          onClick={() => console.log(editor.getHTML())}
+          onClick={() => editor && console.log(editor.getHTML())}
           size="sm"
           className="bg-blue-600 hover:bg-blue-700 text-white"
         >
@@ -135,12 +144,15 @@ const Editor = () => {
 
       <div className="mt-4 text-xs text-gray-500 dark:text-gray-400 flex justify-end gap-4">
         <span>
-          {(editor.storage as any).starterKit?.history?.depth || 0} words
+          {(
+            editor?.storage as { starterKit?: { history?: { depth?: number } } }
+          )?.starterKit?.history?.depth ?? 0}{' '}
+          words
         </span>
-        <span>Character count: {editor?.getText().length}</span>
+        <span>Character count: {editor?.getText().length || 0}</span>
       </div>
     </div>
   );
 };
 
-export default Editor;
+export default EditorComponent;

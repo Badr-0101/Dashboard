@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Calendar } from '@components/shared/ui/calendar';
 import {
   Card,
@@ -8,70 +8,30 @@ import {
 } from '@components/shared/ui/card';
 import { Badge } from '@components/shared/ui/badge';
 
-// Sample event data (replace with your scheduleData)
-const scheduleData = [
-  {
-    Id: 1,
-    Subject: 'Meeting',
-    StartTime: new Date(2021, 0, 10, 10, 0),
-    EndTime: new Date(2021, 0, 10, 12, 30),
-    CategoryColor: '#1aaa55',
-  },
-  {
-    Id: 2,
-    Subject: 'Conference',
-    StartTime: new Date(2021, 0, 11, 9, 0),
-    EndTime: new Date(2021, 0, 11, 11, 0),
-    CategoryColor: '#357cd2',
-  },
-  {
-    Id: 3,
-    Subject: 'Project Review',
-    StartTime: new Date(2021, 0, 12, 14, 0),
-    EndTime: new Date(2021, 0, 12, 16, 0),
-    CategoryColor: '#7fa900',
-  },
-  {
-    Id: 4,
-    Subject: 'Team Lunch',
-    StartTime: new Date(2021, 0, 13, 12, 0),
-    EndTime: new Date(2021, 0, 13, 13, 0),
-    CategoryColor: '#ea7a57',
-  },
-  {
-    Id: 5,
-    Subject: 'Client Call',
-    StartTime: new Date(2021, 0, 14, 15, 0),
-    EndTime: new Date(2021, 0, 14, 16, 30),
-    CategoryColor: '#00bdae',
-  },
-];
+import { scheduleData } from '@data/dummy';
 
 const Scheduler = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date(2021, 0, 10));
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date(2025, 0, 20),
+  );
 
-  // Get events for selected date
-  const getEventsForDate = (date) => {
+  const getEventsForDate = (date?: Date) => {
+    if (!date) return [];
     return scheduleData.filter((event) => {
-      const eventDate = new Date(event.StartTime);
+      const d = event.StartTime;
       return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
+        d.getDate() === date.getDate() &&
+        d.getMonth() === date.getMonth() &&
+        d.getFullYear() === date.getFullYear()
       );
     });
   };
 
-  // Get dates that have events
   const getDatesWithEvents = () => {
-    return scheduleData.map((event) => new Date(event.StartTime));
+    return scheduleData.map((event) => event.StartTime);
   };
 
-  const eventsForSelectedDate = getEventsForDate(selectedDate);
-  const datesWithEvents = getDatesWithEvents();
-
-  // Format time
-  const formatTime = (date) => {
+  const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
       minute: '2-digit',
@@ -79,12 +39,16 @@ const Scheduler = () => {
     }).format(date);
   };
 
+  const eventsForSelectedDate = getEventsForDate(selectedDate);
+  const datesWithEvents = getDatesWithEvents();
+
+  if (!selectedDate) return null;
+
   return (
-    <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white dark:bg-secondary-dark-bg  rounded-3xl">
+    <div className="m-2 md:m-10 mt-24 p-2 md:p-10 bg-white dark:bg-secondary-dark-bg rounded-3xl">
       <h3 className="text-3xl font-extrabold tracking-tight mb-8">Calendar</h3>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Calendar */}
         <Card>
           <CardHeader>
             <CardTitle>Select Date</CardTitle>
@@ -95,9 +59,7 @@ const Scheduler = () => {
               selected={selectedDate}
               onSelect={setSelectedDate}
               className="rounded-md border"
-              modifiers={{
-                hasEvents: datesWithEvents,
-              }}
+              modifiers={{ hasEvents: datesWithEvents }}
               modifiersStyles={{
                 hasEvents: {
                   fontWeight: 'bold',
@@ -108,7 +70,6 @@ const Scheduler = () => {
           </CardContent>
         </Card>
 
-        {/* Events List */}
         <Card>
           <CardHeader>
             <CardTitle>
@@ -131,7 +92,7 @@ const Scheduler = () => {
                     style={{ borderLeftColor: event.CategoryColor }}
                   >
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
+                      <div>
                         <h4 className="font-semibold text-lg">
                           {event.Subject}
                         </h4>
@@ -159,7 +120,6 @@ const Scheduler = () => {
         </Card>
       </div>
 
-      {/* All Events List */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>All Upcoming Events</CardTitle>
@@ -167,7 +127,8 @@ const Scheduler = () => {
         <CardContent>
           <div className="space-y-3">
             {scheduleData
-              .sort((a, b) => a.StartTime - b.StartTime)
+              .slice()
+              .sort((a, b) => a.StartTime.getTime() - b.StartTime.getTime())
               .map((event) => (
                 <div
                   key={event.Id}
